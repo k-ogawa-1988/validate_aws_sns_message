@@ -182,7 +182,7 @@ class SignatureValidator(object):
         message_type = message.get("Type")
 
         if message_type == "Notification":
-            if "Subject" in message:
+            if "Subject" in message and message["Subject"] is not None:
                 return ("Message", "MessageId", "Subject", "Timestamp", "TopicArn", "Type")
             else:
                 return ("Message", "MessageId", "Timestamp", "TopicArn", "Type",)
