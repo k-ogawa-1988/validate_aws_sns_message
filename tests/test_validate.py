@@ -50,7 +50,7 @@ class TestMixin(object):
         self.validate_kwargs = {}
 
         self.message = {
-            "SigningCertURL": "https://sns.us-east-1.amazonaws.com/cert.pem",
+            "SigningCertUrl": "https://sns.us-east-1.amazonaws.com/cert.pem",
             "Timestamp": self.serialize_datetime(self.utc_now),
             "Signature": "",
             "SignatureVersion": "1",
@@ -67,7 +67,7 @@ class TestMixin(object):
 
     def validate(self):
         if isinstance(self.message, dict):
-            certificate = self.signing_certs.get(self.message.get("SigningCertURL"))
+            certificate = self.signing_certs.get(self.message.get("SigningCertUrl"))
         else:
             certificate = None
 
@@ -113,35 +113,35 @@ class ValidateTestCase(TestMixin, unittest.TestCase):
         with self.assertRaisesRegexp(ValidationError, r"^Unexpected message type .*$"):
             self.validate()
 
-class SigningCertURLValidatorTestCase(TestMixin, unittest.TestCase):
+class SigningCertUrlValidatorTestCase(TestMixin, unittest.TestCase):
     def test_valid_com_signing_cert_url(self):
-        self.message["SigningCertURL"] = "https://sns.us-east-1.amazonaws.com/cert.pem"
+        self.message["SigningCertUrl"] = "https://sns.us-east-1.amazonaws.com/cert.pem"
         self.sign_message()
         self.validate()
 
     def test_valid_com_cn_signing_cert_url(self):
-        self.message["SigningCertURL"] = "https://sns.us-east-1.amazonaws.com.cn/cert.pem"
+        self.message["SigningCertUrl"] = "https://sns.us-east-1.amazonaws.com.cn/cert.pem"
         self.sign_message()
         self.validate()
 
     def test_non_aws_signing_cert_url(self):
-        self.message["SigningCertURL"] = "https://example.com/cert.pem"
-        with self.assertRaisesRegexp(ValidationError, r"^SigningCertURL .* doesn't match required format .*"):
+        self.message["SigningCertUrl"] = "https://example.com/cert.pem"
+        with self.assertRaisesRegexp(ValidationError, r"^SigningCertUrl .* doesn't match required format .*"):
             self.validate()
 
     def test_non_aws_controlled_signing_cert_url(self):
-        self.message["SigningCertURL"] = "https://s3.us-east-1.amazonaws.com/evil/cert.pem"
-        with self.assertRaisesRegexp(ValidationError, r"^SigningCertURL .* doesn't match required format .*"):
+        self.message["SigningCertUrl"] = "https://s3.us-east-1.amazonaws.com/evil/cert.pem"
+        with self.assertRaisesRegexp(ValidationError, r"^SigningCertUrl .* doesn't match required format .*"):
             self.validate()
 
     def test_missing_signing_cert_url(self):
-        del self.message["SigningCertURL"]
-        with self.assertRaisesRegexp(ValidationError, r"^SigningCertURL .* doesn't match required format .*"):
+        del self.message["SigningCertUrl"]
+        with self.assertRaisesRegexp(ValidationError, r"^SigningCertUrl .* doesn't match required format .*"):
             self.validate()
 
     def test_non_string_signing_cert_url(self):
-        self.message["SigningCertURL"] = 123
-        with self.assertRaisesRegexp(ValidationError, r"^SigningCertURL .* doesn't match required format .*"):
+        self.message["SigningCertUrl"] = 123
+        with self.assertRaisesRegexp(ValidationError, r"^SigningCertUrl .* doesn't match required format .*"):
             self.validate()
 
 class MessageAgeValidatorTestCase(TestMixin, unittest.TestCase):

@@ -7,14 +7,15 @@ from setuptools import setup
 ROOT = os.path.dirname(__file__)
 
 setup(
-    version="0.1.1",
-    url="https://github.com/nathforge/validatesns",
-    name="validatesns",
-    description="Validate integrity of Amazon SNS messages",
-    long_description=open(os.path.join(ROOT, "README.rst")).read(),
-    author="Nathan Reynolds",
-    author_email="email@nreynolds.co.uk",
-    packages=["validatesns"],
+    version="0.9.0",
+    url="https://github.com/kenichi-ogawa-1988/validate_aws_sns_message",
+    name="validate_aws_sns_message",
+    description="Validate integrity of Amazon SNS messages (Refined)",
+    long_description_content_type="text/markdown",
+    long_description=open(os.path.join(ROOT, "README.md")).read(),
+    author="Ken'ichi Ogawa",
+    author_email="kenichi@ogwk.net",
+    packages=["validate_aws_sns_message"],
     package_dir={"": os.path.join(ROOT, "src")},
     test_suite="tests",
     install_requires=[

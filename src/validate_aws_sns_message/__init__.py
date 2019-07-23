@@ -54,7 +54,7 @@ def validate(
     """
 
     # Check the signing certicate URL.
-    SigningCertURLValidator(certificate_url_regex).validate(message)
+    SigningCertUrlValidator(certificate_url_regex).validate(message)
 
     # Check the message age.
     if not isinstance(max_age, datetime.timedelta):
@@ -63,14 +63,30 @@ def validate(
 
     # Passed the basic checks, let's download the cert.
     # We've validated the URL, so aren't worried about a malicious server.
-    certificate = get_certificate(message["SigningCertURL"])
+    certificate = get_certificate(_get_signing_cert_url(message)[0])
 
     # Check the cryptographic signature.
     SignatureValidator(certificate).validate(message)
 
-class SigningCertURLValidator(object):
+
+def _get_signing_cert_url(message):
     """
-    Validate a message's SigningCertURL is in the expected format.
+    There are 2 pattern for key "SigningCertURL" and "SigningCertUrl".
+
+    Return tuple[value, key]
+    """
+
+    if "SigningCertURL" in message:
+        return message.get("SigningCertURL"), "SigningCertURL"
+    elif "SigningCertUrl" in message:
+        return message.get("SigningCertUrl"), "SigningCertUrl"
+
+    return None, None
+
+
+class SigningCertUrlValidator(object):
+    """
+    Validate a message's SigningCertUrl is in the expected format.
     """
 
     def __init__(self, regex=DEFAULT_CERTIFICATE_URL_REGEX):
@@ -80,12 +96,12 @@ class SigningCertURLValidator(object):
         if not isinstance(message, dict):
             raise ValidationError("Unexpected message type {!r}".format(type(message).__name__))
 
-        url = message.get("SigningCertURL")
+        url = _get_signing_cert_url(message)[0]
 
         if isinstance(url, six.string_types) and re.search(self.regex, url):
             return
 
-        raise ValidationError("SigningCertURL {!r} doesn't match required format {!r}".format(url, self.regex))
+        raise ValidationError("{!r} {!r} doesn't match required format {!r}".format(_get_signing_cert_url(message)[1], url, self.regex))
 
 class MessageAgeValidator(object):
     """
@@ -182,7 +198,7 @@ class SignatureValidator(object):
         message_type = message.get("Type")
 
         if message_type == "Notification":
-            if "Subject" in message:
+            if "Subject" in message and message["Subject"] is not None:
                 return ("Message", "MessageId", "Subject", "Timestamp", "TopicArn", "Type")
             else:
                 return ("Message", "MessageId", "Timestamp", "TopicArn", "Type",)

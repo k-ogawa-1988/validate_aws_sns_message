@@ -7,3 +7,6 @@ __pycache__
 /.tox
 /dist
 /htmlcov
+/build
+
+/.vscode
