@@ -63,10 +63,26 @@ def validate(
 
     # Passed the basic checks, let's download the cert.
     # We've validated the URL, so aren't worried about a malicious server.
-    certificate = get_certificate(message["SigningCertUrl"])
+    certificate = get_certificate(_get_signing_cert_url(message)[0])
 
     # Check the cryptographic signature.
     SignatureValidator(certificate).validate(message)
+
+
+def _get_signing_cert_url(message):
+    """
+    There are 2 pattern for key "SigningCertURL" and "SigningCertUrl".
+
+    Return tuple[value, key]
+    """
+
+    if "SigningCertURL" in message:
+        return message.get("SigningCertURL"), "SigningCertURL"
+    elif "SigningCertUrl" in message:
+        return message.get("SigningCertUrl"), "SigningCertUrl"
+
+    return None, None
+
 
 class SigningCertUrlValidator(object):
     """
@@ -80,12 +96,12 @@ class SigningCertUrlValidator(object):
         if not isinstance(message, dict):
             raise ValidationError("Unexpected message type {!r}".format(type(message).__name__))
 
-        url = message.get("SigningCertUrl")
+        url = _get_signing_cert_url(message)[0]
 
         if isinstance(url, six.string_types) and re.search(self.regex, url):
             return
 
-        raise ValidationError("SigningCertUrl {!r} doesn't match required format {!r}".format(url, self.regex))
+        raise ValidationError("{!r} {!r} doesn't match required format {!r}".format(_get_signing_cert_url(message)[1], url, self.regex))
 
 class MessageAgeValidator(object):
     """
